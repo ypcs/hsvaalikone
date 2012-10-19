@@ -37,15 +37,25 @@ class Party(object):
 		return "%s" % self.name
 
 class Candidate(object):
-	def __init__(self, lastname, firstname, party, municipality, age, www, facebook, twitter):
+	def __init__(self, lastname, firstname, party, *args, **kwargs):
 		self.lastname = lastname
 		self.firstname = firstname
 		self.party = party # TODO: ref Party
-		self.municipality = municipality # TODO: ref Municipality
-		self.age = age
-		self.www = www
-		self.twitter = twitter
-		self.facebook = facebook
+
+		if 'municipality' in kwargs:
+			self.municipality = kwargs['municipality'] # TODO: ref Municipality
+		
+		if 'age' in kwargs:
+			self.age = kwargs['age']
+		
+		if 'url' in kwargs:
+			self.url = kwargs['url']
+		
+		if 'twitter_url' in kwargs:
+			self.twitter_url = kwargs['twitter_url']
+		
+		if 'facebook_url' in kwargs:
+			self.facebook_url = kwargs['facebook_url']
 
 	def __str__(self):
 		return "%s, %s (%s) / %s" % (self.lastname, self.firstname, self.party, self.municipality)
@@ -62,11 +72,11 @@ def read_data(filename, quotechar=CSV_QUOTECHAR, delimiter=CSV_DELIMITER):
 	return data
 
 def parse_row(row):
-	candidate = Candidate(row.pop(0), row.pop(0), row.pop(0), row.pop(0), row.pop(0), row.pop(0), row.pop(0), row.pop(0));
+	candidate = Candidate(municipality=row.pop(0), party=row.pop(0), lastname=row.pop(0), firstname=row.pop(0), age=row.pop(0), url=row.pop(0), facebook_url=row.pop(0), twitter_url=row.pop(0));
 	questions = []
 	
 	for i in range(0, len(row)-3, 4):
-		question = Question(row[i+0], row[i+1], row[i+2], row[i+3])
+		question = Question(question=row[i+0], answer=row[i+1], weight=row[i+2], comment=row[i+3])
 		questions.append(question)
 		
 	return candidate, questions
@@ -76,9 +86,8 @@ def main(args):
 	everything = read_data(args.infile)
 
 	# Pick the second candidate in the list and print her information:
-	parsed_row = parse_row(everything[2]);
-	candidate = parsed_row[0]
-	questions = parsed_row[1]
+	candidate, questions = parse_row(everything[2]);
+	
 	print candidate
 	for	question in questions:
 		print question, "\n"
